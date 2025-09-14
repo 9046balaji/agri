@@ -12,3 +12,4 @@ readmi/
 
 # Ignore artifacts directory
 artifacts/
+.env

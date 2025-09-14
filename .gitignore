@@ -1,0 +1,14 @@
+# Ignore model files and directories
+Phi-3-mini-4k-instruct/
+
+# Ignore Python cache files
+__pycache__/
+
+# Ignore testing files
+testing/
+
+# Ignore readmi directory
+readmi/
+
+# Ignore artifacts directory
+artifacts/

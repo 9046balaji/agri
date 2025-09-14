@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered agricultural platform for crop disease detection, advisory services, and data-driven farming">
+    <meta name="keywords" content="agriculture, AI, crop disease, farming, advisory, weather">
+    <meta name="author" content="Agricultural AI Platform">
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#059669">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="AgriAI">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23059669' d='M16 2L8 10v12l8 8 8-8V10z'/%3E%3C/svg%3E">
+    
+    <title>AgriAI Platform - Smart Crop Management</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Skip Links for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <a href="#navigation" class="skip-link">Skip to navigation</a>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <div class="leaf-icon"></div>
+            </div>
+            <div class="loading-text">Loading AgriAI Platform...</div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline Status Banner -->
+    <div id="offline-banner" class="offline-banner hidden">
+        <div class="offline-content">
+            <span class="offline-icon">📡</span>
+            <span class="offline-text">You're offline. Data will sync when connection is restored.</span>
+            <button class="offline-retry" onclick="checkConnection()">Retry</button>
+        </div>
+    </div>
+
+    <!-- Voice Command Indicator -->
+    <div id="voice-indicator" class="voice-indicator hidden">
+        <div class="voice-animation"></div>
+        <div class="voice-text">Listening...</div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="app-container">
+        <!-- Header -->
+        <header class="header" role="banner">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <div class="leaf-icon"></div>
+                        <span class="logo-text">AgriAI</span>
+                    </div>
+                    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+
+                <nav class="main-nav" id="main-nav" role="navigation">
+                    <ul class="nav-list">
+                        <li><a href="#dashboard" class="nav-link active" data-page="dashboard">Dashboard</a></li>
+                        <li><a href="#detection" class="nav-link" data-page="detection">Detection</a></li>
+                        <li><a href="#advisory" class="nav-link" data-page="advisory">Advisory</a></li>
+                        <li><a href="#weather" class="nav-link" data-page="weather">Weather</a></li>
+                        <li><a href="#chatbot" class="nav-link" data-page="chatbot">Chat</a></li>
+                        <li><a href="#ask-community" class="nav-link" data-page="ask-community">Community</a></li>
+                        <li><a href="#data-hub" class="nav-link admin-only hidden" data-page="data-hub">Data Hub</a></li>
+                        <li><a href="#admin" class="nav-link admin-only hidden" data-page="admin">Admin</a></li>
+                    </ul>
+                </nav>
+
+                <div class="header-actions">
+                    <button class="voice-btn" id="voice-btn" title="Voice Commands (Press V)" aria-label="Activate voice commands">
+                        🎤
+                    </button>
+                    <button class="accessibility-btn" id="accessibility-btn" title="Accessibility Options" aria-label="Open accessibility options">
+                        ♿
+                    </button>
+                    <div class="user-menu">
+                        <button class="user-avatar" id="user-menu-btn" aria-label="User menu">
+                            <span class="avatar-text">U</span>
+                            <span class="user-role" id="user-role-display">Farmer</span>
+                        </button>
+                        <div class="user-dropdown hidden" id="user-dropdown">
+                            <a href="#profile" class="dropdown-item" data-page="profile">Profile</a>
+                            <a href="#settings" class="dropdown-item" data-page="settings">Settings</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item" onclick="logout()">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content" role="main">
+            <!-- Authentication Screen -->
+            <div id="auth-screen" class="page-container active">
+                <div class="auth-container">
+                    <div class="auth-header">
+                        <div class="auth-logo">
+                            <div class="leaf-icon large"></div>
+                        </div>
+                        <h1>Welcome to AgriAI Platform</h1>
+                        <p>AI-powered crop management for smarter farming</p>
+                    </div>
+
+                    <div class="auth-form">
+                        <div class="form-group">
+                            <label for="phone-number">Phone Number</label>
+                            <input type="tel" id="phone-number" placeholder="+1234567890" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="user-role">I am a:</label>
+                            <select id="user-role" required>
+                                <option value="">Select your role</option>
+                                <option value="farmer">Farmer</option>
+                                <option value="field-agent">Field Agent</option>
+                                <option value="researcher">Researcher</option>
+                                <option value="admin">Administrator</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="language">Preferred Language</label>
+                            <select id="language">
+                                <option value="en">English</option>
+                                <option value="hi">हिंदी (Hindi)</option>
+                                <option value="bn">বাংলা (Bengali)</option>
+                                <option value="te">తెలుగు (Telugu)</option>
+                                <option value="ta">தமிழ் (Tamil)</option>
+                            </select>
+                        </div>
+
+                        <div class="consent-section">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="data-consent" required>
+                                <label for="data-consent">I agree to data collection for crop advisory and research purposes</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="location-consent">
+                                <label for="location-consent">Allow location access for weather and local recommendations</label>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="authenticate()">Get Started</button>
+                        
+                        <div class="accessibility-options">
+                            <button class="btn btn-text" onclick="enableVoiceMode()">🎤 Voice Setup</button>
+                            <button class="btn btn-text" onclick="enableHighContrast()">🔆 High Contrast</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard -->
+            <div id="dashboard-screen" class="page-container">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <div class="sync-status" id="sync-status">
+                        <span class="sync-icon">🔄</span>
+                        <span class="sync-text">All data synced</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Quick Actions -->
+                    <div class="dashboard-card quick-actions">
+                        <h2>Quick Actions</h2>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="openDetection()" aria-label="Open camera for disease detection">
+                                <span class="action-icon">📷</span>
+                                <span class="action-text">Detect Disease</span>
+                            </button>
+                            <button class="action-btn" onclick="checkWeather()" aria-label="Check current weather">
+                                <span class="action-icon">🌤️</span>
+                                <span class="action-text">Weather</span>
+                            </button>
+                            <button class="action-btn" onclick="getAdvice()" aria-label="Get crop advice">
+                                <span class="action-icon">🌱</span>
+                                <span class="action-text">Get Advice</span>
+                            </button>
+                            <button class="action-btn" onclick="askCommunity()" aria-label="Ask community">
+                                <span class="action-icon">👥</span>
+                                <span class="action-text">Ask Community</span>
+                            </button>
+                            <button class="action-btn" onclick="openChatbot()" aria-label="Chat with AI">
+                                <span class="action-icon">🤖</span>
+                                <span class="action-text">Chat AI</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Weather Alert -->
+                    <div class="dashboard-card weather-card">
+                        <h2>Today's Weather</h2>
+                        <div class="weather-info" id="weather-info">
+                            <div class="weather-main">
+                                <span class="weather-temp">28°C</span>
+                                <span class="weather-desc">Partly Cloudy</span>
+                            </div>
+                            <div class="weather-details">
+                                <span>Humidity: 65%</span>
+                                <span>Rain Chance: 20%</span>
+                            </div>
+                        </div>
+                        <div class="weather-alert">
+                            <span class="alert-icon">⚠️</span>
+                            <span class="alert-text">Good day for spraying - low wind</span>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="dashboard-card activity-card">
+                        <h2>Recent Activity</h2>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon">📷</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Disease Detection</div>
+                                    <div class="activity-time">2 hours ago</div>
+                                </div>
+                                <div class="activity-status success">Healthy</div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">💬</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Community Question</div>
+                                    <div class="activity-time">Yesterday</div>
+                                </div>
+                                <div class="activity-status">3 replies</div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">📊</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Advisory Report</div>
+                                    <div class="activity-time">3 days ago</div>
+                                </div>
+                                <div class="activity-status">Read</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Farm Status (Farmer-specific) -->
+                    <div class="dashboard-card farm-status farmer-only">
+                        <h2>Farm Status</h2>
+                        <div class="farm-grid">
+                            <div class="farm-stat">
+                                <span class="stat-value">5</span>
+                                <span class="stat-label">Active Crops</span>
+                            </div>
+                            <div class="farm-stat">
+                                <span class="stat-value">12</span>
+                                <span class="stat-label">Detections This Week</span>
+                            </div>
+                            <div class="farm-stat">
+                                <span class="stat-value">98%</span>
+                                <span class="stat-label">Crop Health</span>
+                            </div>
+                            <div class="farm-stat">
+                                <span class="stat-value">3</span>
+                                <span class="stat-label">Pending Tasks</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Field Operations (Field Agent-specific) -->
+                    <div class="dashboard-card field-ops field-agent-only hidden">
+                        <h2>Field Operations</h2>
+                        <div class="field-stats">
+                            <div class="field-stat">
+                                <span class="stat-value">25</span>
+                                <span class="stat-label">Farmers Assigned</span>
+                            </div>
+                            <div class="field-stat">
+                                <span class="stat-value">8</span>
+                                <span class="stat-label">Visits Today</span>
+                            </div>
+                            <div class="field-stat">
+                                <span class="stat-value">45</span>
+                                <span class="stat-label">Detections Reviewed</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openFieldOps()">Manage Visits</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disease Detection -->
+            <div id="detection-screen" class="page-container">
+                <div class="page-header">
+                    <h1>Crop Disease Detection</h1>
+                    <p>Take a photo of your crop to identify diseases and get treatment recommendations</p>
+                </div>
+
+                <div class="detection-container">
+                    <div class="camera-section">
+                        <div class="camera-view" id="camera-view">
+                            <video id="camera-stream" autoplay playsinline></video>
+                            <canvas id="camera-canvas" style="display:none;"></canvas>
+                            <div class="camera-overlay">
+                                <div class="focus-frame"></div>
+                                <div class="camera-instructions">
+                                    Position crop leaves in the frame
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="camera-controls">
+                            <button class="btn btn-secondary" onclick="switchCamera()">🔄 Switch</button>
+                            <button class="btn btn-primary camera-capture" onclick="captureImage()">📷 Capture</button>
+                            <button class="btn btn-secondary" onclick="uploadFromGallery()">📁 Gallery</button>
+                        </div>
+                        
+                        <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="handleFileUpload(event)">
+                    </div>
+
+                    <div class="detection-results" id="detection-results" style="display:none;">
+                        <div class="results-header">
+                            <h3>Detection Results</h3>
+                            <div class="confidence-score">
+                                <span class="confidence-label">Confidence:</span>
+                                <span class="confidence-value" id="confidence-value">--</span>
+                            </div>
+                        </div>
+
+                        <div class="detection-image">
+                            <img id="detected-image" alt="Analyzed crop image">
+                        </div>
+
+                        <div class="diagnosis-section">
+                            <div class="diagnosis-item">
+                                <h4>Diagnosis</h4>
+                                <p id="diagnosis-text">Analyzing...</p>
+                            </div>
+                            
+                            <div class="treatment-section" id="treatment-section" style="display:none;">
+                                <h4>Treatment Recommendations</h4>
+                                <div class="treatment-list" id="treatment-list">
+                                    <!-- Treatment recommendations will be populated here -->
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="saveResult()">💾 Save Result</button>
+                                <button class="btn btn-secondary" onclick="shareResult()">📤 Share</button>
+                                <button class="btn btn-secondary" onclick="retakePhoto()">📷 Retake</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detection-history">
+                        <h3>Recent Detections</h3>
+                        <div class="history-list" id="history-list">
+                            <!-- Detection history will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crop Advisory -->
+            <div id="advisory-screen" class="page-container">
+                <div class="page-header">
+                    <h1>Crop Advisory</h1>
+                    <p>Get personalized recommendations for your crops</p>
+                </div>
+
+                <div class="advisory-container">
+                    <div class="crop-selector">
+                        <label for="crop-select">Select Crop:</label>
+                        <select id="crop-select" onchange="loadCropAdvisory()">
+                            <option value="">Choose a crop</option>
+                            <option value="rice">Rice</option>
+                            <option value="wheat">Wheat</option>
+                            <option value="maize">Maize</option>
+                            <option value="cotton">Cotton</option>
+                            <option value="tomato">Tomato</option>
+                            <option value="potato">Potato</option>
+                        </select>
+                    </div>
+
+                    <div class="advisory-content" id="advisory-content">
+                        <div class="advisory-card">
+                            <h3>🌱 Growth Stage Advisory</h3>
+                            <div class="growth-stage">
+                                <p>Current Stage: <strong id="growth-stage">Vegetative</strong></p>
+                                <p>Days to Next Stage: <strong id="days-to-next">15 days</strong></p>
+                                <div class="stage-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 60%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="advisory-card">
+                            <h3>💧 Irrigation Advisory</h3>
+                            <div class="irrigation-info">
+                                <p><strong>Next Irrigation:</strong> <span id="next-irrigation">In 2 days</span></p>
+                                <p><strong>Water Requirement:</strong> <span id="water-requirement">25mm</span></p>
+                                <p><strong>Soil Moisture:</strong> <span id="soil-moisture">Good</span></p>
+                            </div>
+                        </div>
+
+                        <div class="advisory-card">
+                            <h3>🍃 Fertilizer Advisory</h3>
+                            <div class="fertilizer-info">
+                                <div class="fertilizer-item">
+                                    <strong>Nitrogen (N):</strong> Apply 30 kg/ha
+                                </div>
+                                <div class="fertilizer-item">
+                                    <strong>Phosphorus (P):</strong> Apply 20 kg/ha
+                                </div>
+                                <div class="fertilizer-item">
+                                    <strong>Potassium (K):</strong> Apply 15 kg/ha
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="advisory-card">
+                            <h3>🐛 Pest & Disease Alert</h3>
+                            <div class="pest-alerts">
+                                <div class="alert-item warning">
+                                    <span class="alert-icon">⚠️</span>
+                                    <div class="alert-content">
+                                        <strong>Brown Plant Hopper</strong>
+                                        <p>Monitor for early signs. Apply neem-based insecticide if detected.</p>
+                                    </div>
+                                </div>
+                                <div class="alert-item info">
+                                    <span class="alert-icon">ℹ️</span>
+                                    <div class="alert-content">
+                                        <strong>Blast Disease</strong>
+                                        <p>Weather conditions favorable. Consider preventive spraying.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="advisory-card">
+                            <h3>📅 Weekly Action Plan</h3>
+                            <div class="action-plan">
+                                <div class="day-item">
+                                    <strong>Today:</strong> Apply urea fertilizer
+                                </div>
+                                <div class="day-item">
+                                    <strong>Tomorrow:</strong> Check for pest infestation
+                                </div>
+                                <div class="day-item">
+                                    <strong>Day 3:</strong> Irrigation if soil moisture is low
+                                </div>
+                                <div class="day-item">
+                                    <strong>Day 5:</strong> Weed management
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather -->
+            <div id="weather-screen" class="page-container">
+                <div class="page-header">
+                    <h1>Weather Center</h1>
+                    <p>Agricultural weather forecasts and alerts</p>
+                </div>
+
+                <div class="weather-container">
+                    <div class="current-weather">
+                        <div class="weather-main-info">
+                            <div class="temperature">28°C</div>
+                            <div class="weather-desc">Partly Cloudy</div>
+                            <div class="feels-like">Feels like 31°C</div>
+                        </div>
+                        
+                        <div class="weather-details-grid">
+                            <div class="weather-detail">
+                                <span class="detail-label">Humidity</span>
+                                <span class="detail-value">65%</span>
+                            </div>
+                            <div class="weather-detail">
+                                <span class="detail-label">Wind Speed</span>
+                                <span class="detail-value">12 km/h</span>
+                            </div>
+                            <div class="weather-detail">
+                                <span class="detail-label">Rain Chance</span>
+                                <span class="detail-value">20%</span>
+                            </div>
+                            <div class="weather-detail">
+                                <span class="detail-label">UV Index</span>
+                                <span class="detail-value">7 High</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="weather-forecast">
+                        <h3>7-Day Forecast</h3>
+                        <div class="forecast-grid">
+                            <div class="forecast-day">
+                                <div class="day-name">Today</div>
+                                <div class="day-icon">☀️</div>
+                                <div class="day-temp">32° / 24°</div>
+                                <div class="day-rain">10%</div>
+                            </div>
+                            <div class="forecast-day">
+                                <div class="day-name">Tomorrow</div>
+                                <div class="day-icon">⛅</div>
+                                <div class="day-temp">29° / 22°</div>
+                                <div class="day-rain">30%</div>
+                            </div>
+                            <div class="forecast-day">
+                                <div class="day-name">Wed</div>
+                                <div class="day-icon">🌦️</div>
+                                <div class="day-temp">26° / 20°</div>
+                                <div class="day-rain">70%</div>
+                            </div>
+                            <div class="forecast-day">
+                                <div class="day-name">Thu</div>
+                                <div class="day-icon">🌧️</div>
+                                <div class="day-temp">24° / 19°</div>
+                                <div class="day-rain">90%</div>
+                            </div>
+                            <div class="forecast-day">
+                                <div class="day-name">Fri</div>
+                                <div class="day-icon">⛅</div>
+                                <div class="day-temp">27° / 21°</div>
+                                <div class="day-rain">40%</div>
+                            </div>
+                            <div class="forecast-day">
+                                <div class="day-name">Sat</div>
+                                <div class="day-icon">☀️</div>
+                                <div class="day-temp">30° / 23°</div>
+                                <div class="day-rain">15%</div>
+                            </div>
+                            <div class="forecast-day">
+                                <div class="day-name">Sun</div>
+                                <div class="day-icon">☀️</div>
+                                <div class="day-temp">31° / 24°</div>
+                                <div class="day-rain">5%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="agricultural-alerts">
+                        <h3>Agricultural Alerts</h3>
+                        <div class="alert-list">
+                            <div class="weather-alert success">
+                                <span class="alert-icon">✅</span>
+                                <div class="alert-content">
+                                    <strong>Good Spraying Conditions</strong>
+                                    <p>Low wind speed and humidity make this ideal for pesticide application.</p>
+                                </div>
+                            </div>
+                            <div class="weather-alert warning">
+                                <span class="alert-icon">⚠️</span>
+                                <div class="alert-content">
+                                    <strong>Heavy Rain Expected</strong>
+                                    <p>Postpone field activities on Wednesday-Thursday due to expected rainfall.</p>
+                                </div>
+                            </div>
+                            <div class="weather-alert info">
+                                <span class="alert-icon">ℹ️</span>
+                                <div class="alert-content">
+                                    <strong>High UV Index</strong>
+                                    <p>Protect crops and workers during peak hours (11 AM - 3 PM).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ask Community -->
+            <div id="ask-community-screen" class="page-container">
+                <div class="page-header">
+                    <h1>Ask Community</h1>
+                    <p>Connect with fellow farmers and experts</p>
+                </div>
+
+                <div class="ask-community-container">
+                    <!-- Backend Status Indicator -->
+                    <div id="backend-status" class="backend-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Checking AI Assistant...</span>
+                    </div>
+
+                    <!-- Backend Query Form -->
+                    <div class="query-backend-card">
+                        <h2>Ask AI Assistant</h2>
+                        <form id="ask-community-form" class="question-form">
+                            <div class="form-group">
+                                <label for="questionInput">Your Question</label>
+                                <textarea id="questionInput" placeholder="Ask about crop diseases, farming techniques, weather impact..." required maxlength="500"></textarea>
+                                <div class="char-count"><span id="query-char-count">0</span>/500</div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="langSelect">Language</label>
+                                    <select id="langSelect">
+                                        <option value="">Auto-detect</option>
+                                        <option value="en">English</option>
+                                        <option value="hi">Hindi</option>
+                                        <option value="te">Telugu</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="translateToSelect">Response Language</label>
+                                    <select id="translateToSelect">
+                                        <option value="">Same as query</option>
+                                        <option value="en">English</option>
+                                        <option value="hi">Hindi</option>
+                                        <option value="te">Telugu</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" id="query-btn">
+                                <span class="btn-icon">🤖</span>
+                                Ask AI
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Answers Container -->
+                    <div id="answers-container" class="answers-container">
+                        <!-- Answers will be displayed here -->
+                    </div>
+
+                    <!-- Post Question Form -->
+                    <div class="post-question-card">
+                        <h2>Post a Question</h2>
+                        <form id="question-form" class="question-form">
+                            <div class="form-group">
+                                <label for="question-text">Your Question</label>
+                                <textarea id="question-text" placeholder="Ask about farming techniques, pest control, crop management..." required maxlength="500"></textarea>
+                                <div class="char-count"><span id="char-count">0</span>/500</div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="question-category">Category</label>
+                                    <select id="question-category" required>
+                                        <option value="">Select category</option>
+                                        <option value="pest-control">Pest Control</option>
+                                        <option value="irrigation">Irrigation</option>
+                                        <option value="fertilization">Fertilization</option>
+                                        <option value="planting">Planting</option>
+                                        <option value="soil-management">Soil Management</option>
+                                        <option value="crop-management">Crop Management</option>
+                                        <option value="weather">Weather Impact</option>
+                                        <option value="equipment">Equipment</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="question-image">Add Image (Optional)</label>
+                                    <input type="file" id="question-image" accept="image/*" onchange="previewImage(this)">
+                                    <div class="image-preview" id="image-preview"></div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" id="post-question-btn">
+                                <span class="btn-icon">📤</span>
+                                Post Question
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="filters-section">
+                        <div class="filter-controls">
+                            <div class="filter-group">
+                                <label for="filter-category">Filter by Category:</label>
+                                <select id="filter-category">
+                                    <option value="">All Categories</option>
+                                    <option value="pest-control">Pest Control</option>
+                                    <option value="irrigation">Irrigation</option>
+                                    <option value="fertilization">Fertilization</option>
+                                    <option value="planting">Planting</option>
+                                    <option value="soil-management">Soil Management</option>
+                                    <option value="crop-management">Crop Management</option>
+                                    <option value="weather">Weather Impact</option>
+                                    <option value="equipment">Equipment</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label for="sort-by">Sort by:</label>
+                                <select id="sort-by">
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                    <option value="most-responses">Most Responses</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-secondary" onclick="refreshQuestions()">
+                                <span class="btn-icon">🔄</span>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Questions Feed -->
+                    <div class="questions-feed" id="questions-feed">
+                        <div class="loading-spinner" id="feed-loading">
+                            <div class="spinner"></div>
+                            <p>Loading questions...</p>
+                        </div>
+
+                        <!-- Questions will be dynamically inserted here -->
+                    </div>
+
+                    <!-- Load More Button -->
+                    <div class="load-more-container">
+                        <button class="btn btn-secondary" id="load-more-btn" onclick="loadMoreQuestions()" style="display: none;">
+                            Load More Questions
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chatbot -->
+            <div id="chatbot-screen" class="page-container">
+                <div class="page-header">
+                    <h1>AI Chat Assistant</h1>
+                    <p>Get instant answers to your farming questions</p>
+                </div>
+
+                <div class="chatbot-container">
+                    <!-- Chat Session Info -->
+                    <div class="chat-info" id="chat-info">
+                        <div class="session-status">
+                            <span class="status-dot online"></span>
+                            <span class="status-text">AI Assistant Online</span>
+                        </div>
+                        <div class="session-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="clearChatSession()" title="Clear conversation">
+                                🗑️ Clear
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="newChatSession()" title="Start new conversation">
+                                ➕ New Chat
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages Area -->
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-welcome">
+                            <div class="bot-avatar">🤖</div>
+                            <div class="welcome-message">
+                                <h3>Hello! I'm your AI farming assistant</h3>
+                                <p>Ask me about crop diseases, farming techniques, weather impact, or any agricultural questions you have. I'm here to help!</p>
+                                <div class="quick-suggestions">
+                                    <button class="suggestion-btn" onclick="sendQuickMessage('How do I prevent rice blast disease?')">
+                                        🌾 Rice disease prevention
+                                    </button>
+                                    <button class="suggestion-btn" onclick="sendQuickMessage('What are the best irrigation practices?')">
+                                        💧 Irrigation tips
+                                    </button>
+                                    <button class="suggestion-btn" onclick="sendQuickMessage('How does weather affect crop growth?')">
+                                        🌤️ Weather impact
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                        <div class="bot-avatar">🤖</div>
+                        <div class="typing-animation">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input Area -->
+                    <div class="chat-input-area">
+                        <form id="chat-form" class="chat-form">
+                            <div class="input-container">
+                                <div class="language-selector">
+                                    <select id="chat-language" title="Input language">
+                                        <option value="">Auto-detect</option>
+                                        <option value="en">English</option>
+                                        <option value="hi">Hindi</option>
+                                        <option value="te">Telugu</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="message-input-wrapper">
+                                    <textarea 
+                                        id="chat-input" 
+                                        placeholder="Ask me anything about farming..."
+                                        rows="1"
+                                        maxlength="500"
+                                        required
+                                    ></textarea>
+                                    <div class="input-actions">
+                                        <button type="button" class="voice-input-btn" id="voice-input-btn" title="Voice input">
+                                            🎤
+                                        </button>
+                                        <button type="submit" class="send-btn" id="send-btn" disabled>
+                                            ➤
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="response-language-selector">
+                                    <select id="chat-response-language" title="Response language">
+                                        <option value="">Same as input</option>
+                                        <option value="en">English</option>
+                                        <option value="hi">Hindi</option>
+                                        <option value="te">Telugu</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="char-count">
+                                <span id="chat-char-count">0</span>/500
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Chat History Panel (collapsible) -->
+                    <div class="chat-history-panel" id="chat-history-panel">
+                        <div class="history-header">
+                            <h4>Previous Conversations</h4>
+                            <button class="toggle-history" onclick="toggleChatHistory()">
+                                📋
+                            </button>
+                        </div>
+                        <div class="history-list" id="chat-history-list">
+                            <!-- Previous chat sessions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Hub (Researcher/Admin only) -->
+            <div id="data-hub-screen" class="page-container">
+                <div class="page-header">
+                    <h1>Data Hub</h1>
+                    <p>Access research datasets and collaborative tools</p>
+                </div>
+
+                <div class="data-hub-container">
+                    <div class="data-stats">
+                        <div class="stat-card">
+                            <div class="stat-number">12.5K</div>
+                            <div class="stat-label">Images Analyzed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">850</div>
+                            <div class="stat-label">Active Farmers</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">25</div>
+                            <div class="stat-label">Crop Types</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">95.2%</div>
+                            <div class="stat-label">Detection Accuracy</div>
+                        </div>
+                    </div>
+
+                    <div class="datasets-section">
+                        <h3>Available Datasets</h3>
+                        <div class="dataset-list">
+                            <div class="dataset-item">
+                                <div class="dataset-info">
+                                    <h4>Rice Disease Image Dataset</h4>
+                                    <p>Comprehensive collection of rice disease images with expert annotations</p>
+                                    <div class="dataset-meta">
+                                        <span class="meta-item">📊 2,500 images</span>
+                                        <span class="meta-item">🏷️ 12 disease types</span>
+                                        <span class="meta-item">📅 Updated weekly</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary" onclick="requestDataAccess('rice-disease')">Request Access</button>
+                            </div>
+                            <div class="dataset-item">
+                                <div class="dataset-info">
+                                    <h4>Weather-Crop Correlation Data</h4>
+                                    <p>Historical weather data correlated with crop yield and health metrics</p>
+                                    <div class="dataset-meta">
+                                        <span class="meta-item">📊 5 years of data</span>
+                                        <span class="meta-item">🌍 10 regions</span>
+                                        <span class="meta-item">📈 Yield correlations</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary" onclick="requestDataAccess('weather-crop')">Request Access</button>
+                            </div>
+                            <div class="dataset-item">
+                                <div class="dataset-info">
+                                    <h4>Farmer Advisory Effectiveness</h4>
+                                    <p>Anonymized data on advisory effectiveness and farmer outcomes</p>
+                                    <div class="dataset-meta">
+                                        <span class="meta-item">📊 1,200 farmers</span>
+                                        <span class="meta-item">📈 Outcome tracking</span>
+                                        <span class="meta-item">🔒 Privacy-preserved</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary" onclick="requestDataAccess('advisory-effectiveness')">Request Access</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Panel -->
+            <div id="admin-screen" class="page-container">
+                <div class="page-header">
+                    <h1>Admin Dashboard</h1>
+                    <p>System administration and monitoring</p>
+                </div>
+
+                <div class="admin-container">
+                    <div class="admin-nav">
+                        <button class="admin-tab active" onclick="showAdminTab('overview')">Overview</button>
+                        <button class="admin-tab" onclick="showAdminTab('users')">Users</button>
+                        <button class="admin-tab" onclick="showAdminTab('models')">ML Models</button>
+                        <button class="admin-tab" onclick="showAdminTab('audit')">Audit Logs</button>
+                    </div>
+
+                    <div id="admin-overview" class="admin-content active">
+                        <div class="system-stats">
+                            <div class="stat-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value">99.8%</div>
+                                    <div class="stat-label">System Uptime</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">1,245</div>
+                                    <div class="stat-label">Active Users</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">3.2s</div>
+                                    <div class="stat-label">Avg Response Time</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">95.2%</div>
+                                    <div class="stat-label">Model Accuracy</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="system-alerts">
+                            <h3>System Alerts</h3>
+                            <div class="alert-item info">
+                                <span class="alert-icon">ℹ️</span>
+                                <div class="alert-content">
+                                    <strong>Scheduled Maintenance</strong>
+                                    <p>System maintenance planned for Sunday 2:00 AM - 4:00 AM</p>
+                                </div>
+                            </div>
+                            <div class="alert-item success">
+                                <span class="alert-icon">✅</span>
+                                <div class="alert-content">
+                                    <strong>Model Update Deployed</strong>
+                                    <p>Rice disease detection model v2.1 deployed successfully</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="admin-users" class="admin-content">
+                        <div class="user-management">
+                            <div class="management-header">
+                                <h3>User Management</h3>
+                                <button class="btn btn-primary" onclick="addUser()">Add User</button>
+                            </div>
+                            <div class="user-list">
+                                <div class="user-item">
+                                    <div class="user-info">
+                                        <div class="user-name">John Farmer</div>
+                                        <div class="user-meta">Farmer • Active • Last login: 2 hours ago</div>
+                                    </div>
+                                    <div class="user-actions">
+                                        <button class="btn btn-sm" onclick="editUser('user1')">Edit</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deactivateUser('user1')">Deactivate</button>
+                                    </div>
+                                </div>
+                                <div class="user-item">
+                                    <div class="user-info">
+                                        <div class="user-name">Sarah Agent</div>
+                                        <div class="user-meta">Field Agent • Active • Last login: 5 minutes ago</div>
+                                    </div>
+                                    <div class="user-actions">
+                                        <button class="btn btn-sm" onclick="editUser('user2')">Edit</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deactivateUser('user2')">Deactivate</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="admin-models" class="admin-content">
+                        <div class="model-management">
+                            <h3>ML Model Status</h3>
+                            <div class="model-list">
+                                <div class="model-item">
+                                    <div class="model-info">
+                                        <h4>Rice Disease Detection</h4>
+                                        <div class="model-meta">
+                                            <span>Version: 2.1.0</span>
+                                            <span>Accuracy: 95.2%</span>
+                                            <span>Last Updated: 2 days ago</span>
+                                        </div>
+                                    </div>
+                                    <div class="model-status active">Active</div>
+                                </div>
+                                <div class="model-item">
+                                    <div class="model-info">
+                                        <h4>Wheat Disease Detection</h4>
+                                        <div class="model-meta">
+                                            <span>Version: 1.8.0</span>
+                                            <span>Accuracy: 92.8%</span>
+                                            <span>Last Updated: 1 week ago</span>
+                                        </div>
+                                    </div>
+                                    <div class="model-status active">Active</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="admin-audit" class="admin-content">
+                        <div class="audit-logs">
+                            <h3>Audit Logs</h3>
+                            <div class="log-filters">
+                                <select id="log-type">
+                                    <option value="all">All Activities</option>
+                                    <option value="login">User Login</option>
+                                    <option value="detection">Disease Detection</option>
+                                    <option value="data-access">Data Access</option>
+                                </select>
+                                <input type="date" id="log-date" value="2024-01-15">
+                                <button class="btn btn-secondary" onclick="filterLogs()">Filter</button>
+                            </div>
+                            <div class="log-list">
+                                <div class="log-item">
+                                    <div class="log-time">10:30 AM</div>
+                                    <div class="log-action">User Login</div>
+                                    <div class="log-details">farmer@example.com logged in from mobile app</div>
+                                </div>
+                                <div class="log-item">
+                                    <div class="log-time">10:25 AM</div>
+                                    <div class="log-action">Disease Detection</div>
+                                    <div class="log-details">Rice blast detection performed by user ID: 1234</div>
+                                </div>
+                                <div class="log-item">
+                                    <div class="log-time">10:20 AM</div>
+                                    <div class="log-action">Data Access</div>
+                                    <div class="log-details">Research dataset accessed by researcher@university.edu</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile -->
+            <div id="profile-screen" class="page-container">
+                <div class="page-header">
+                    <h1>Profile</h1>
+                    <p>Manage your account and preferences</p>
+                </div>
+
+                <div class="profile-container">
+                    <div class="profile-section">
+                        <h3>Personal Information</h3>
+                        <div class="profile-form">
+                            <div class="form-group">
+                                <label for="profile-name">Full Name</label>
+                                <input type="text" id="profile-name" value="John Farmer">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-phone">Phone Number</label>
+                                <input type="tel" id="profile-phone" value="+1234567890">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-email">Email</label>
+                                <input type="email" id="profile-email" value="john@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-location">Location</label>
+                                <input type="text" id="profile-location" value="Village Name, District, State">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>Farm Information</h3>
+                        <div class="farm-form">
+                            <div class="form-group">
+                                <label for="farm-size">Farm Size (acres)</label>
+                                <input type="number" id="farm-size" value="5.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="primary-crops">Primary Crops</label>
+                                <input type="text" id="primary-crops" value="Rice, Wheat">
+                            </div>
+                            <div class="form-group">
+                                <label for="farming-type">Farming Type</label>
+                                <select id="farming-type">
+                                    <option value="conventional">Conventional</option>
+                                    <option value="organic" selected>Organic</option>
+                                    <option value="mixed">Mixed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3>Privacy & Data</h3>
+                        <div class="privacy-settings">
+                            <div class="privacy-item">
+                                <div class="privacy-info">
+                                    <strong>Data Collection for Research</strong>
+                                    <p>Allow anonymized data to be used for agricultural research</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="privacy-item">
+                                <div class="privacy-info">
+                                    <strong>Location Tracking</strong>
+                                    <p>Enable location-based weather and advisory services</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="privacy-item">
+                                <div class="privacy-info">
+                                    <strong>Community Sharing</strong>
+                                    <p>Allow sharing of detection results with community (anonymized)</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+                        <button class="btn btn-secondary" onclick="exportData()">Export My Data</button>
+                        <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <div id="settings-screen" class="page-container">
+                <div class="page-header">
+                    <h1>Settings</h1>
+                    <p>Customize your experience</p>
+                </div>
+
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3>🔊 Voice & Accessibility</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <strong>Voice Commands</strong>
+                                <p>Enable voice navigation and commands</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="voice-enabled" onchange="toggleVoiceCommands()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <strong>High Contrast Mode</strong>
+                                <p>Increase contrast for better visibility</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="high-contrast" onchange="toggleHighContrast()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <strong>Large Text</strong>
+                                <p>Increase text size for better readability</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="large-text" onchange="toggleLargeText()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>🌐 Language & Region</h3>
+                        <div class="form-group">
+                            <label for="app-language">App Language</label>
+                            <select id="app-language" onchange="changeLanguage()">
+                                <option value="en">English</option>
+                                <option value="hi">हिंदी (Hindi)</option>
+                                <option value="bn">বাংলা (Bengali)</option>
+                                <option value="te">తెలుగు (Telugu)</option>
+                                <option value="ta">தமிழ் (Tamil)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="region">Region</label>
+                            <select id="region">
+                                <option value="in">India</option>
+                                <option value="bd">Bangladesh</option>
+                                <option value="pk">Pakistan</option>
+                                <option value="lk">Sri Lanka</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>📱 Notifications</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <strong>Weather Alerts</strong>
+                                <p>Get notified about weather conditions affecting crops</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <strong>Advisory Updates</strong>
+                                <p>Receive personalized crop advisory notifications</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <strong>Community Activity</strong>
+                                <p>Get notified about community discussions and answers</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>📶 Data & Offline</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <strong>Auto Sync</strong>
+                                <p>Automatically sync data when connected</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <strong>WiFi Only Sync</strong>
+                                <p>Only sync when connected to WiFi</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="offline-content">Offline Content</label>
+                            <select id="offline-content">
+                                <option value="essential">Essential Only</option>
+                                <option value="extended">Extended Content</option>
+                                <option value="full">Full Offline Access</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                        <button class="btn btn-secondary" onclick="resetSettings()">Reset to Default</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Voice Command Float Button -->
+        <button class="voice-float-btn" id="voice-float-btn" onclick="toggleVoiceCommand()" aria-label="Voice commands">
+            🎤
+        </button>
+
+        <!-- Bottom Navigation (Mobile) -->
+        <nav class="bottom-nav" id="bottom-nav" role="navigation">
+            <a href="#dashboard" class="bottom-nav-item active" data-page="dashboard">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="#detection" class="bottom-nav-item" data-page="detection">
+                <span class="nav-icon">📷</span>
+                <span class="nav-text">Detect</span>
+            </a>
+            <a href="#advisory" class="bottom-nav-item" data-page="advisory">
+                <span class="nav-icon">🌱</span>
+                <span class="nav-text">Advisory</span>
+            </a>
+            <a href="#weather" class="bottom-nav-item" data-page="weather">
+                <span class="nav-icon">🌤️</span>
+                <span class="nav-text">Weather</span>
+            </a>
+            <a href="#profile" class="bottom-nav-item" data-page="profile">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Accessibility Modal -->
+    <div id="accessibility-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Accessibility Options</h2>
+                <button class="modal-close" onclick="closeAccessibilityModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="accessibility-options">
+                    <button class="accessibility-option" onclick="toggleHighContrast()">
+                        <span class="option-icon">🔆</span>
+                        <span class="option-text">High Contrast</span>
+                    </button>
+                    <button class="accessibility-option" onclick="toggleLargeText()">
+                        <span class="option-icon">🔍</span>
+                        <span class="option-text">Large Text</span>
+                    </button>
+                    <button class="accessibility-option" onclick="enableVoiceMode()">
+                        <span class="option-icon">🎤</span>
+                        <span class="option-text">Voice Commands</span>
+                    </button>
+                    <button class="accessibility-option" onclick="enableScreenReader()">
+                        <span class="option-icon">🔊</span>
+                        <span class="option-text">Screen Reader</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

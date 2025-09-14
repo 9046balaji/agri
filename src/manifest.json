@@ -1,0 +1,16 @@
+{
+  "name": "AgriAI Platform",
+  "short_name": "AgriAI",
+  "description": "AI-powered agricultural platform for crop disease detection and advisory services",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#059669",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path fill='%23059669' d='M16 2L8 10v12l8 8 8-8V10z'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
